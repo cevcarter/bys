@@ -1,3 +1,3 @@
-# gp - Gaussian Processes for Regression and Classification
+# bys - a Bayesian framework
 
 
