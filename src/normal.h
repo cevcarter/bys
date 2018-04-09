@@ -1,5 +1,6 @@
 #include <cmath>
 #include <string>
+#include <random>
 
 #include "distribution.h"
 #include "simpleinput.h"
@@ -14,6 +15,10 @@ private:
     Distribution<T>* sigma;
     SimpleInput<T>* obs;
 
+    std::default_random_engine generator = std::default_random_engine();
+    std::normal_distribution<T> stepper = std::normal_distribution<T>(0., 1.);
+    double width = 1.;
+
 public:
     Normal(string name, Distribution<T>* mu, Distribution<T>* sigma, SimpleInput<T>* obs=NULL) : Distribution<T>(name), mu(mu), sigma(sigma), obs(obs) { this->current = mu->getCurrent(); };
 
@@ -24,18 +29,25 @@ public:
         else {
             double sum = 0.;
             for (T x : obs->getBuffer()) {
-                sum += this->logpdist(this->candidate, this->mu->getCandidate(), this->sigma->getCandidate()) + this->mu->logp() + this->sigma->logp(); 
+                sum += this->logpdist(x, this->mu->getCandidate(), this->sigma->getCandidate()) + this->mu->logp() + this->sigma->logp(); 
             }
             return sum;
         }
     }
 
-    T getSample() { // sample up the tree
-        this->candidate = 0.; 
-        this->mu->getSample();
-        this->sigma->getSample();
-        return this->candidate; 
-    } 
+    T getSample();
+
+    void acceptCandidate() { this->trace.push_back(this->candidate); this->current = this->candidate; this->mu->acceptCandidate(); this->sigma->acceptCandidate();}
 };
+
+template <class T>
+T Normal<T>::getSample() {
+    T sample = stepper(generator);
+
+    this->candidate = sample / this->width + this->current;
+    this->mu->getSample();
+    this->sigma->getSample();
+    return this->candidate;
+}
 
 #endif

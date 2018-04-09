@@ -15,6 +15,9 @@ public:
 
     double logp() { return 0.; }
     T getSample() { return c; }
+    
+    void acceptCandidate() { this->trace.push_back(c); }
+
 };
 
 #endif

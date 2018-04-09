@@ -21,10 +21,7 @@ public:
     virtual double logp() {}; // for model logp computation
     virtual T getSample() {}; // get random sample from model
 
-    void acceptCandidate() { 
-        *(this->current) = *(this->candidate); 
-        this->trace.push_back(this->current); 
-    }
+    virtual void acceptCandidate() {};
 
     T getCandidate() { return candidate; }
     T getCurrent() { return current; }

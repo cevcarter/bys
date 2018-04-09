@@ -6,10 +6,11 @@
 template <class T>
 class SimpleInput {
 private:
-    vector<T> buffer;
+    vector<T>* buffer = new vector<T>();
 
 public:
-    vector<T> getBuffer() { return buffer; }
+    vector<T> getBuffer() { return *buffer; }
+    void push(T x) { buffer->push_back(x); }
 };
 
 #endif
