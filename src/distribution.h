@@ -1,17 +1,37 @@
+#include <vector>
+#include <string>
 
+using std::string;
+using std::vector;
 
 #ifndef DISTRIBUTION_H
 #define DISTRIBUTION_H
 
-template <class varType>
+template <class T>
 class Distribution {
-private:
+protected:
+    T current;
+    T candidate;
+    vector<T> trace;
+    string name;
 
 public:
-//    double logp(const varType& x) {}; // logp of input
-    virtual double candidateLogp() {};
-    virtual varType getCandidate() {}; // generates a new sample using MCMC sampling method
-    virtual varType getCurrent() {}; // returns current sample
+    Distribution(string name) : name(name) {};
+
+    virtual double logp() {}; // for model logp computation
+    virtual T getSample() {}; // get random sample from model
+
+    void acceptCandidate() { 
+        *(this->current) = *(this->candidate); 
+        this->trace.push_back(this->current); 
+    }
+
+    T getCandidate() { return candidate; }
+    T getCurrent() { return current; }
+    
+    vector<T> getTrace() { return trace; }
+    string getName() { return name; }
+   
 };
 
 #endif

@@ -1,21 +1,20 @@
-#include <cmath>
+#include <string>
 
 #include "distribution.h"
 
 #ifndef CONSTANT_H
 #define CONSTANT_H
 
-template <class varType>
-class Constant : virtual public Distribution<varType> {
+template <class T>
+class Constant : public Distribution<T> {
 private:
-    double c;
+    T c;
     
 public:
-    Constant(const double& c) { this->c = c; };
+    Constant(string name, T c) : Distribution<T>(name), c(c) { this->current = this->candidate = c; }
 
-    static double logp(const double& x) { return 0.; };
-    varType getCandidate() { return c; }; 
-    varType getCurrent() { return c; };
+    double logp() { return 0.; }
+    T getSample() { return c; }
 };
 
 #endif

@@ -2,39 +2,40 @@
 #include <string>
 
 #include "distribution.h"
-#include "sampler.h"
+#include "simpleinput.h"
 
 #ifndef NORMAL_H
 #define NORMAL_H
 
-template <class varType>
-class Normal : virtual public Distribution<varType> {
+template <class T>
+class Normal : public Distribution<T> {
 private:
-    Sampler<varType>* sampler;
-    Distribution<varType>* mu;
-    Distribution<varType>* sigma;
-    varType current; // current sampled value
-    varType candidate; // candidate sampled value
+    Distribution<T>* mu;
+    Distribution<T>* sigma;
+    SimpleInput<T>* obs;
 
 public:
-    // constructors
-    Normal(Distribution<varType>* mu, Distribution<varType>* sigma, Sampler<varType>* sampler) { 
-        this->mu = mu; 
-        this->sigma = sigma; 
-        this->sampler = sampler;
+    Normal(string name, Distribution<T>* mu, Distribution<T>* sigma, SimpleInput<T>* obs=NULL) : Distribution<T>(name), mu(mu), sigma(sigma), obs(obs) { this->current = mu->getCurrent(); };
 
-        this->current = this->candidate = mu->getCurrent();
-    };
+    static double logpdist(const T& x, const T& mu, const T& sigma) { return -std::log(std::sqrt(2 * M_PI)) - std::log(sigma) - .5 * std::pow((x - mu)/sigma, 2); }; 
 
+    double logp() { 
+        if (obs == NULL) return this->logpdist(this->candidate, this->mu->getCandidate(), this->sigma->getCandidate()) + this->mu->logp() + this->sigma->logp(); 
+        else {
+            double sum = 0.;
+            for (T x : obs->getBuffer()) {
+                sum += this->logpdist(this->candidate, this->mu->getCandidate(), this->sigma->getCandidate()) + this->mu->logp() + this->sigma->logp(); 
+            }
+            return sum;
+        }
+    }
 
-    static double logp(const varType& x, const varType& mu, const varType& sigma) { return -std::log(std::sqrt(2 * M_PI)) - std::log(sigma) - .5 * std::pow((x - mu)/sigma, 2); }; 
-
-    double candidateLogp() { return this->logp(this->candidate, this->mu->getCandidate(), this->sigma->getCandidate()) + this->mu->candidateLogp() + this->sigma->candidateLogp(); };
-
-    varType getCandidate() { candidate = sampler->generateCandidate( this->current ); return candidate; };
-
-    varType getCurrent() { return current; };
-    void acceptCandidate() { *(this->current) = *(this->candidate); };
+    T getSample() { // sample up the tree
+        this->candidate = 0.; 
+        this->mu->getSample();
+        this->sigma->getSample();
+        return this->candidate; 
+    } 
 };
 
 #endif
