@@ -14,6 +14,7 @@ protected:
     T candidate;
     vector<T> trace;
     string name;
+    double width;
 
 public:
     Distribution(string name) : name(name) {};
@@ -29,6 +30,7 @@ public:
     vector<T> getTrace() { return trace; }
     string getName() { return name; }
    
+     virtual void incrementWidth( double delta ) { }
 };
 
 #endif

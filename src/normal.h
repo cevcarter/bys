@@ -18,6 +18,7 @@ private:
     std::default_random_engine generator = std::default_random_engine();
     std::normal_distribution<T> stepper = std::normal_distribution<T>(0., 1.);
     double width = 1.;
+    string sampler_type = "metropolis";
 
 public:
     Normal(string name, Distribution<T>* mu, Distribution<T>* sigma, SimpleInput<T>* obs=NULL) : Distribution<T>(name), mu(mu), sigma(sigma), obs(obs) { this->current = mu->getCurrent(); };
@@ -36,7 +37,8 @@ public:
     }
 
     T getSample();
-
+        
+    void incrementWidth( double delta ) { this->width += delta; this->mu->incrementWidth( delta ); this->sigma->incrementWidth( delta ); }
     void acceptCandidate() { this->trace.push_back(this->candidate); this->current = this->candidate; this->mu->acceptCandidate(); this->sigma->acceptCandidate();}
 };
 
@@ -44,7 +46,7 @@ template <class T>
 T Normal<T>::getSample() {
     T sample = stepper(generator);
 
-    this->candidate = sample / this->width + this->current;
+    this->candidate = sample * this->width + this->current;
     this->mu->getSample();
     this->sigma->getSample();
     return this->candidate;

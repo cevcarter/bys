@@ -18,6 +18,7 @@ public:
     
     void acceptCandidate() { this->trace.push_back(c); }
 
+    void incrementWidth( double delta ) {};
 };
 
 #endif
